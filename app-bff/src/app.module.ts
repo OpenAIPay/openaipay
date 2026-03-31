@@ -121,6 +121,6 @@ import { UserFlowService } from './user-flow/user-flow.service';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestContextMiddleware, AuthMiddleware).forRoutes('*');
+    consumer.apply(RequestContextMiddleware, AuthMiddleware).forRoutes('{*splat}');
   }
 }

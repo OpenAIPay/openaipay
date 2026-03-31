@@ -6,7 +6,9 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { AccountService } from './../src/account/account.service';
 import { AuthService } from './../src/auth/auth.service';
+import { AuthMiddleware } from './../src/common/auth.middleware';
 import { BackendHttpService } from './../src/common/backend-http.service';
+import { RequestContextMiddleware } from './../src/common/request-context.middleware';
 import { PageInitService } from './../src/page-init/page-init.service';
 import { SearchService } from './../src/search/search.service';
 import { UserService } from './../src/user/user.service';
@@ -86,6 +88,10 @@ describe('AppController (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    const requestContextMiddleware = new RequestContextMiddleware();
+    const authMiddleware = new AuthMiddleware();
+    app.use((req, res, next) => requestContextMiddleware.use(req, res, next));
+    app.use((req, res, next) => authMiddleware.use(req, res, next));
     await app.init();
   });
 
@@ -213,7 +219,12 @@ describe('AppController (e2e)', () => {
       })
       .expect(200)
       .expect((response) => {
-        expect(authService.mobileVerifyLogin).toHaveBeenCalledWith('13920000001', 'ios-device-001');
+        expect(authService.mobileVerifyLogin).toHaveBeenCalledWith(
+          '13920000001',
+          'ios-device-001',
+          undefined,
+          undefined,
+        );
         expect(response.body).toMatchObject({
           success: true,
           data: {
