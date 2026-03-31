@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="theme-color" content="#2b7fff" />
+    <title>爱付管理后台</title>
+    <link rel="icon" type="image/svg+xml" href="/manager/favicon.svg?v=20260315-1" />
+    <link rel="stylesheet" href="/manager/app.css?v=20260323-3" />
+  </head>
+  <body>
+    <div id="app" class="manager-app">
+      <section id="loginView" class="manager-login-page">
+        <div class="manager-login-card">
+          <div class="manager-login-brand">爱付管理后台</div>
+          <div class="manager-login-sub">请输入管理员账号与密码登录</div>
+          <form id="loginForm" class="manager-login-form">
+            <label class="form-label" for="usernameInput">管理员账号</label>
+            <input id="usernameInput" class="form-input" name="username" value="admin" autocomplete="username" required />
+
+            <label class="form-label" for="passwordInput">登录密码</label>
+            <input
+              id="passwordInput"
+              class="form-input"
+              name="password"
+              type="password"
+              value=""
+              autocomplete="current-password"
+              required
+            />
+
+            <button id="loginSubmit" class="login-submit" type="submit">登录后台</button>
+          </form>
+          <span class="manager-login-tip">默认管理员账号：admin</span>
+          <div id="loginTip" class="manager-login-warn">请输入账号密码后登录</div>
+        </div>
+      </section>
+
+      <section id="consoleView" class="manager-shell hidden">
+        <aside class="manager-sidebar">
+          <div class="manager-brand-wrap">
+            <div class="manager-brand">爱付管理后台</div>
+          </div>
+          <nav id="sidebarMenu" class="manager-menu"></nav>
+        </aside>
+
+        <main class="manager-main">
+          <header class="manager-topbar">
+            <div class="manager-topbar-actions">
+              <span id="managerName" class="manager-name">-</span>
+              <button id="languageButton" class="manager-lang-btn" type="button">EN</button>
+              <button id="logoutButton" class="manager-logout-btn" type="button">退出登录</button>
+            </div>
+          </header>
+          <section id="contentPane" class="manager-content"></section>
+        </main>
+      </section>
+    </div>
+
+    <script src="/manager/app.js?v=20260329-5"></script>
+  </body>
+</html>

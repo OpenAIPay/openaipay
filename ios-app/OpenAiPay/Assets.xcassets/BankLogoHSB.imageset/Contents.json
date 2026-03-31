@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "idiom": "universal",
+      "scale": "1x",
+      "filename": "BankLogoHSB.png"
+    },
+    {
+      "idiom": "universal",
+      "scale": "2x",
+      "filename": "BankLogoHSB@2x.png"
+    },
+    {
+      "idiom": "universal",
+      "scale": "3x",
+      "filename": "BankLogoHSB@3x.png"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

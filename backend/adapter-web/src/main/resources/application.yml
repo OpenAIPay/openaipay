@@ -1,0 +1,91 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: openaipay-backend
+  config:
+    import: optional:classpath:aipay-id-biz-type.properties
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mvc:
+    servlet:
+      load-on-startup: 1
+  datasource:
+    url: jdbc:mysql://${OPENAIPAY_DB_HOST:127.0.0.1}:${OPENAIPAY_DB_PORT:13306}/${OPENAIPAY_DB_NAME:openaipay}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false&connectTimeout=3000&socketTimeout=15000&tcpKeepAlive=true&cachePrepStmts=true&prepStmtCacheSize=256&prepStmtCacheSqlLimit=2048&useServerPrepStmts=true&useLocalSessionState=true&useLocalTransactionState=true&elideSetAutoCommits=true&maintainTimeStats=false&rewriteBatchedStatements=true
+    username: ${OPENAIPAY_DB_USERNAME:root}
+    password: "${OPENAIPAY_DB_PASSWORD}"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      auto-commit: false
+      maximum-pool-size: 8
+      minimum-idle: 1
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 120000
+      max-lifetime: 120000
+      keepalive-time: 30000
+      initialization-fail-timeout: -1
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    locations: ${OPENAIPAY_FLYWAY_LOCATIONS:filesystem:local/flyway-migration}
+    table: portal_flyway_schema_history
+    baseline-on-migrate: true
+    baseline-version: 0
+    ignore-migration-patterns:
+      - "*:future"
+      - "*:missing"
+      - "versioned:ignored"
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  type-handlers-package: cn.openaipay.infrastructure.common.persistence
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+aipay:
+  security:
+    token-signing-secret: ${OPENAIPAY_TOKEN_SIGNING_SECRET}
+    token-default-expires-in-seconds: ${OPENAIPAY_TOKEN_DEFAULT_EXPIRES_IN_SECONDS:604800}
+    allow-insecure-defaults: ${OPENAIPAY_ALLOW_INSECURE_DEFAULTS:false}
+  gateway:
+    retry-times: 0
+    retry-backoff-ms: 20
+    bank:
+      mode: LOCAL
+      timeout-ms: 1000
+      simulated-latency-ms: 5
+      default-secret: OPENAIPAY_BANK_SECRET
+      simulate-bad-response-signature: false
+      mock:
+        base-url: http://127.0.0.1:8080/api/mock/nucc
+        default-merchant-id: OPENAIPAY
+        simulated-latency-ms: 20
+  trade:
+    persist-success-flow-steps: false
+  pay:
+    skip-fund-detail-for-transfer: false
+    skip-try-success-branch-persist-for-transfer: true
+  scheduler:
+    lock-enabled: true
+    lock-lease-seconds: 30
+  settle:
+    platform-fee-user-id: 880921068428800021
+  red-packet:
+    holding-user-id: 880231069206400031
+  media:
+    storage-base-path: ./media-storage
+    max-image-bytes: 10485760
+    compress-max-width: 1280
+    jpeg-quality: 0.82
+  fund:
+    primary-code: AICASH
+    aicash:
+      annualized-yield-rate: 0.01045

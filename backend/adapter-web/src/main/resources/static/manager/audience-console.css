@@ -1,0 +1,259 @@
+.audience-frame-body {
+  margin: 0;
+  background: transparent;
+}
+
+.audience-console-root {
+  display: grid;
+  gap: 14px;
+}
+
+.audience-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.audience-toolbar .manager-title {
+  margin-bottom: 4px;
+}
+
+.audience-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audience-toolbar-note {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.audience-overview-panel {
+  margin-top: 0;
+}
+
+.audience-overview-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.audience-overview-strip-title {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: #24405f;
+}
+
+.audience-overview-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.audience-overview-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 0 10px;
+  height: 30px;
+  border: 1px solid #d9e6f7;
+  border-radius: 999px;
+  background: #f8fbff;
+}
+
+.audience-overview-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b678d;
+}
+
+.audience-overview-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f5fbf;
+}
+
+.audience-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.audience-tab-btn {
+  border: 1px solid #d7e3f6;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #3a4f70;
+  font-size: 13px;
+  line-height: 1;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.audience-tab-btn:hover {
+  border-color: #b8cdec;
+  background: #f1f7ff;
+}
+
+.audience-tab-btn.is-active {
+  border-color: #2f78e4;
+  background: #2f78e4;
+  color: #fff;
+  font-weight: 600;
+}
+
+.audience-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.audience-section-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.audience-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.audience-form-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.audience-form-grid.one {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.audience-field {
+  display: grid;
+  gap: 4px;
+}
+
+.audience-field label {
+  font-size: 12px;
+  color: #536b8f;
+}
+
+.audience-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audience-inline-row .form-input {
+  max-width: 260px;
+}
+
+.audience-table-wrap {
+  overflow-x: auto;
+}
+
+.audience-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.audience-table th,
+.audience-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.audience-table th {
+  color: #4d6488;
+  font-weight: 600;
+  background: #f8fbff;
+}
+
+.audience-code {
+  font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+  color: #18437f;
+  background: #edf4ff;
+  border-radius: 6px;
+  padding: 2px 6px;
+  display: inline-block;
+}
+
+.audience-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.audience-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #c6d7f2;
+  color: #1e3f73;
+  background: #eef4ff;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 10px;
+}
+
+.audience-notice {
+  display: inline-block;
+  font-size: 12px;
+  color: #2558a5;
+  background: #eef5ff;
+  border: 1px solid #d7e6ff;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+@media (max-width: 1200px) {
+  .audience-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .audience-toolbar {
+    flex-direction: column;
+  }
+
+  .audience-toolbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .audience-form-grid,
+  .audience-form-grid.two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .audience-overview-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .audience-overview-list {
+    width: 100%;
+  }
+
+  .audience-tab-btn {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}

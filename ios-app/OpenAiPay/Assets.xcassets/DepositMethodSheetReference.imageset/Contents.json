@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "deposit_method_sheet_reference.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "deposit_method_sheet_reference@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "deposit_method_sheet_reference@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

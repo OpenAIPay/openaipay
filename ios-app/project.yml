@@ -1,0 +1,36 @@
+name: 爱付
+options:
+  minimumXcodeGenVersion: 2.39.0
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    IPHONEOS_DEPLOYMENT_TARGET: 17.0
+targets:
+  OpenAiPay:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: OpenAiPay
+    info:
+      path: OpenAiPay/Info.plist
+      properties:
+        CFBundleDisplayName: 爱付
+        UILaunchStoryboardName: LaunchScreen
+        NSAppTransportSecurity:
+          NSExceptionDomains:
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
+            127.0.0.1:
+              NSExceptionAllowsInsecureHTTPLoads: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cn.openaipay.ios
+        PRODUCT_NAME: 爱付
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: OpenAiPay/Info.plist
+        DONT_GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: 爱付
+        INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic

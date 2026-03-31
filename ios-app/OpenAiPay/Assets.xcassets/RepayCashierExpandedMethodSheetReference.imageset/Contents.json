@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "filename": "repay_cashier_expanded_method_sheet.png",
+      "idiom": "universal",
+      "scale": "1x"
+    },
+    {
+      "filename": "repay_cashier_expanded_method_sheet@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
+      "filename": "repay_cashier_expanded_method_sheet@3x.png",
+      "idiom": "universal",
+      "scale": "3x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
