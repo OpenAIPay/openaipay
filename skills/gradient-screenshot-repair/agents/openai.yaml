@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gradient Screenshot Repair"
+  short_description: "Repair mobile screenshot gradients cleanly"
+  default_prompt: "Use $gradient-screenshot-repair to erase UI content from a screenshot and rebuild the native gradient without visible seams."

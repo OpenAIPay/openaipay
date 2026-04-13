@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local iOS RSD Resilient"
+  short_description: "Retry official capture, then fall back to legacy direct RSD"
+  default_prompt: "Use $local-ios-rsd-capture-resilient to capture the current page from the USB-connected iPhone on this Mac by retrying the official repo capture flow first and then falling back to the proven legacy-log plus current-user direct RSD path if needed."

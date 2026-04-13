@@ -1,0 +1,4 @@
+interface:
+  display_name: "AiPay Frontend Theme Guard"
+  short_description: "Guard AiPay purple theme for UI and reference assets"
+  default_prompt: "Follow AiPay frontend theme contract: use AppTheme tokens for runtime components, replace screenshot reference assets directly instead of overlay recolor, then run theme checks before finishing."
