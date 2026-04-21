@@ -5890,13 +5890,24 @@ struct HomeView: View {
             let fontScale = min(scaleX, scaleY)
 
             ZStack {
-                referenceImage(
-                    named: referenceAssetName,
-                    size: proxy.size
-                )
-                .contentShape(Rectangle())
-                .onLongPressGesture(minimumDuration: 1.2) {
-                    appState.logout()
+                if currentPage == .video {
+                    ShortVideoFeedView(
+                        onBackHome: {
+                            currentPage = .home
+                        },
+                        showsBottomTab: false,
+                        bottomTabReservedHeight: 96
+                    )
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                } else {
+                    referenceImage(
+                        named: referenceAssetName,
+                        size: proxy.size
+                    )
+                    .contentShape(Rectangle())
+                    .onLongPressGesture(minimumDuration: 1.2) {
+                        appState.logout()
+                    }
                 }
 
                 if currentPage == .bankCards {
@@ -5948,7 +5959,7 @@ struct HomeView: View {
                     }
                 }
 
-                if currentPage == .finance || currentPage == .video || currentPage == .travel || currentPage == .fund {
+                if currentPage == .finance || currentPage == .travel || currentPage == .fund {
                     pendingFeatureBannerOverlay(scaleX: scaleX, scaleY: scaleY, fontScale: fontScale)
                 }
 

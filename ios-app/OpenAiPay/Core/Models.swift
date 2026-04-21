@@ -87,6 +87,20 @@ private func normalizeAvatarURLString(_ raw: String?) -> String? {
     return trimmed
 }
 
+private func normalizeBackendMediaURLString(_ raw: String?) -> String? {
+    let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    guard !trimmed.isEmpty else {
+        return nil
+    }
+    if trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://") {
+        return trimmed
+    }
+    if trimmed.hasPrefix("/") {
+        return "\(ModelRuntime.backendBaseURL)\(trimmed)"
+    }
+    return trimmed
+}
+
 
 struct BffEnvelope<T: Decodable>: Decodable {
     let success: Bool
@@ -3143,4 +3157,381 @@ struct DeliverCreativeData: Codable {
     let displayOrder: Int?
     let fallback: Bool
     let previewImage: String?
+}
+
+struct ShortVideoFeedPageData: Decodable, Equatable {
+    let items: [ShortVideoFeedItemData]
+    let nextCursor: String?
+    let hasMore: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case items
+        case nextCursor
+        case hasMore
+    }
+
+    init(items: [ShortVideoFeedItemData], nextCursor: String?, hasMore: Bool) {
+        self.items = items
+        self.nextCursor = nextCursor?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        self.hasMore = hasMore
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        items = try container.decodeIfPresent([ShortVideoFeedItemData].self, forKey: .items) ?? []
+        nextCursor = (try? container.decode(String.self, forKey: .nextCursor))?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        hasMore = try container.decodeIfPresent(Bool.self, forKey: .hasMore) ?? false
+    }
+}
+
+struct ShortVideoFeedItemData: Decodable, Equatable, Identifiable {
+    let videoId: String
+    let caption: String
+    let author: ShortVideoAuthorData
+    let coverUrl: String
+    let playback: ShortVideoPlaybackInfoData
+    let engagement: ShortVideoEngagementData
+
+    var id: String { videoId }
+
+    enum CodingKeys: String, CodingKey {
+        case videoId
+        case caption
+        case author
+        case coverUrl
+        case playback
+        case engagement
+    }
+
+    init(
+        videoId: String,
+        caption: String,
+        author: ShortVideoAuthorData,
+        coverUrl: String,
+        playback: ShortVideoPlaybackInfoData,
+        engagement: ShortVideoEngagementData
+    ) {
+        self.videoId = videoId.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.caption = caption.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.author = author
+        self.coverUrl = normalizeBackendMediaURLString(coverUrl) ?? coverUrl
+        self.playback = playback
+        self.engagement = engagement
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let rawVideoId = (try? container.decode(String.self, forKey: .videoId))?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        videoId = rawVideoId
+        caption = (try? container.decode(String.self, forKey: .caption))?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        author = try container.decode(ShortVideoAuthorData.self, forKey: .author)
+        let rawCoverUrl = (try? container.decode(String.self, forKey: .coverUrl)) ?? ""
+        coverUrl = normalizeBackendMediaURLString(rawCoverUrl) ?? rawCoverUrl
+        playback = try container.decode(ShortVideoPlaybackInfoData.self, forKey: .playback)
+        engagement = try container.decodeIfPresent(ShortVideoEngagementData.self, forKey: .engagement)
+            ?? ShortVideoEngagementData(liked: false, favorited: false, likeCount: 0, favoriteCount: 0, commentCount: 0)
+    }
+}
+
+struct ShortVideoAuthorData: Decodable, Equatable {
+    let userId: Int64
+    let nickname: String
+    let avatarUrl: String?
+
+    enum CodingKeys: String, CodingKey {
+        case userId
+        case nickname
+        case avatarUrl
+    }
+
+    init(userId: Int64, nickname: String, avatarUrl: String?) {
+        self.userId = userId
+        let trimmedNickname = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.nickname = trimmedNickname.isEmpty ? "用户\(userId)" : trimmedNickname
+        self.avatarUrl = normalizeAvatarURLString(avatarUrl)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let value = try? container.decode(Int64.self, forKey: .userId) {
+            userId = value
+        } else if let text = try? container.decode(String.self, forKey: .userId),
+                  let value = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            userId = value
+        } else {
+            userId = 0
+        }
+        let rawNickname = (try? container.decode(String.self, forKey: .nickname)) ?? ""
+        let trimmedNickname = rawNickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        nickname = trimmedNickname.isEmpty ? "用户\(userId)" : trimmedNickname
+        avatarUrl = normalizeAvatarURLString(try? container.decode(String.self, forKey: .avatarUrl))
+    }
+}
+
+struct ShortVideoPlaybackInfoData: Decodable, Equatable {
+    let playbackUrl: String
+    let playbackProtocol: String
+    let mimeType: String
+    let durationMs: Int64
+    let width: Int?
+    let height: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case playbackUrl
+        case playbackProtocol = "protocol"
+        case mimeType
+        case durationMs
+        case width
+        case height
+    }
+
+    init(
+        playbackUrl: String,
+        playbackProtocol: String,
+        mimeType: String,
+        durationMs: Int64,
+        width: Int?,
+        height: Int?
+    ) {
+        self.playbackUrl = normalizeBackendMediaURLString(playbackUrl) ?? playbackUrl
+        self.playbackProtocol = playbackProtocol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        self.mimeType = mimeType.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.durationMs = max(durationMs, 0)
+        self.width = width
+        self.height = height
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let rawPlaybackURL = (try? container.decode(String.self, forKey: .playbackUrl)) ?? ""
+        playbackUrl = normalizeBackendMediaURLString(rawPlaybackURL) ?? rawPlaybackURL
+        playbackProtocol = ((try? container.decode(String.self, forKey: .playbackProtocol)) ?? "MP4")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .uppercased()
+        mimeType = ((try? container.decode(String.self, forKey: .mimeType)) ?? "video/mp4")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if let value = try? container.decode(Int64.self, forKey: .durationMs) {
+            durationMs = max(value, 0)
+        } else if let text = try? container.decode(String.self, forKey: .durationMs),
+                  let value = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            durationMs = max(value, 0)
+        } else {
+            durationMs = 0
+        }
+        width = try? container.decode(Int.self, forKey: .width)
+        height = try? container.decode(Int.self, forKey: .height)
+    }
+}
+
+struct ShortVideoEngagementData: Decodable, Equatable {
+    let liked: Bool
+    let favorited: Bool
+    let likeCount: Int64
+    let favoriteCount: Int64
+    let commentCount: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case liked
+        case favorited
+        case likeCount
+        case favoriteCount
+        case commentCount
+    }
+
+    init(liked: Bool, favorited: Bool, likeCount: Int64, favoriteCount: Int64, commentCount: Int64) {
+        self.liked = liked
+        self.favorited = favorited
+        self.likeCount = max(likeCount, 0)
+        self.favoriteCount = max(favoriteCount, 0)
+        self.commentCount = max(commentCount, 0)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        liked = try container.decodeIfPresent(Bool.self, forKey: .liked) ?? false
+        favorited = try container.decodeIfPresent(Bool.self, forKey: .favorited) ?? false
+        likeCount = ShortVideoEngagementData.decodeCount(container, key: .likeCount)
+        favoriteCount = ShortVideoEngagementData.decodeCount(container, key: .favoriteCount)
+        commentCount = ShortVideoEngagementData.decodeCount(container, key: .commentCount)
+    }
+
+    private static func decodeCount(
+        _ container: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) -> Int64 {
+        if let value = try? container.decode(Int64.self, forKey: key) {
+            return max(value, 0)
+        }
+        if let text = try? container.decode(String.self, forKey: key),
+           let value = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            return max(value, 0)
+        }
+        return 0
+    }
+}
+
+struct ShortVideoCommentPageData: Decodable, Equatable {
+    let items: [ShortVideoCommentData]
+    let nextCursor: String?
+    let hasMore: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case items
+        case nextCursor
+        case hasMore
+    }
+
+    init(items: [ShortVideoCommentData], nextCursor: String?, hasMore: Bool) {
+        self.items = items
+        self.nextCursor = nextCursor?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        self.hasMore = hasMore
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        items = try container.decodeIfPresent([ShortVideoCommentData].self, forKey: .items) ?? []
+        nextCursor = (try? container.decode(String.self, forKey: .nextCursor))?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        hasMore = try container.decodeIfPresent(Bool.self, forKey: .hasMore) ?? false
+    }
+}
+
+struct ShortVideoCommentData: Decodable, Equatable, Identifiable {
+    let commentId: String
+    let videoId: String
+    let parentCommentId: String?
+    let rootCommentId: String?
+    let user: ShortVideoAuthorData
+    let content: String
+    let imageUrl: String?
+    let liked: Bool
+    let likeCount: Int64
+    let replyCount: Int64
+    let previewReplies: [ShortVideoCommentData]
+    let createdAt: String
+
+    var id: String { commentId }
+
+    enum CodingKeys: String, CodingKey {
+        case commentId
+        case videoId
+        case parentCommentId
+        case rootCommentId
+        case user
+        case content
+        case imageUrl
+        case liked
+        case likeCount
+        case replyCount
+        case previewReplies
+        case createdAt
+    }
+
+    init(commentId: String,
+         videoId: String,
+         parentCommentId: String? = nil,
+         rootCommentId: String? = nil,
+         user: ShortVideoAuthorData,
+         content: String,
+         imageUrl: String? = nil,
+         liked: Bool = false,
+         likeCount: Int64 = 0,
+         replyCount: Int64 = 0,
+         previewReplies: [ShortVideoCommentData] = [],
+         createdAt: String) {
+        self.commentId = commentId.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.videoId = videoId.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.parentCommentId = parentCommentId?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        self.rootCommentId = rootCommentId?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        self.user = user
+        self.content = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.imageUrl = normalizeBackendMediaURLString(imageUrl)
+        self.liked = liked
+        self.likeCount = max(likeCount, 0)
+        self.replyCount = max(replyCount, 0)
+        self.previewReplies = previewReplies
+        self.createdAt = createdAt.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        commentId = ((try? container.decode(String.self, forKey: .commentId)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        videoId = ((try? container.decode(String.self, forKey: .videoId)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        parentCommentId = ((try? container.decode(String.self, forKey: .parentCommentId)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        rootCommentId = ((try? container.decode(String.self, forKey: .rootCommentId)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .nilIfEmpty
+        user = try container.decode(ShortVideoAuthorData.self, forKey: .user)
+        content = ((try? container.decode(String.self, forKey: .content)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        imageUrl = normalizeBackendMediaURLString(try? container.decode(String.self, forKey: .imageUrl))
+        liked = try container.decodeIfPresent(Bool.self, forKey: .liked) ?? false
+        likeCount = ShortVideoCommentData.decodeCount(container, key: .likeCount)
+        replyCount = ShortVideoCommentData.decodeCount(container, key: .replyCount)
+        previewReplies = try container.decodeIfPresent([ShortVideoCommentData].self, forKey: .previewReplies) ?? []
+        createdAt = ((try? container.decode(String.self, forKey: .createdAt)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func decodeCount(
+        _ container: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) -> Int64 {
+        if let value = try? container.decode(Int64.self, forKey: key) {
+            return max(value, 0)
+        }
+        if let text = try? container.decode(String.self, forKey: key),
+           let value = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            return max(value, 0)
+        }
+        return 0
+    }
+}
+
+struct ShortVideoCommentLikeData: Decodable, Equatable {
+    let commentId: String
+    let liked: Bool
+    let likeCount: Int64
+
+    enum CodingKeys: String, CodingKey {
+        case commentId
+        case liked
+        case likeCount
+    }
+
+    init(commentId: String, liked: Bool, likeCount: Int64) {
+        self.commentId = commentId.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.liked = liked
+        self.likeCount = max(likeCount, 0)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        commentId = ((try? container.decode(String.self, forKey: .commentId)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        liked = try container.decodeIfPresent(Bool.self, forKey: .liked) ?? false
+        if let value = try? container.decode(Int64.self, forKey: .likeCount) {
+            likeCount = max(value, 0)
+        } else if let text = try? container.decode(String.self, forKey: .likeCount),
+                  let value = Int64(text.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            likeCount = max(value, 0)
+        } else {
+            likeCount = 0
+        }
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
+    }
 }

@@ -15,16 +15,30 @@ let package = Package(
     targets: [
         .target(
             name: "OpenAiPayCoreLogic",
-            path: "OpenAiPay/Core",
+            path: "OpenAiPay",
             exclude: [
-                "APIClient.swift",
-                "AppState.swift",
-                "AppTheme.swift",
-                "ScreenshotStatusMaskView.swift"
+                "Assets.xcassets",
+                "Config",
+                "ContentView.swift",
+                "Core/APIClient.swift",
+                "Core/AppState.swift",
+                "Core/AppTheme.swift",
+                "Core/ScreenshotStatusMaskView.swift",
+                "Features/Auth",
+                "Features/Home",
+                "Features/ShortVideo/Components",
+                "Features/ShortVideo/ViewModels",
+                "Features/ShortVideo/Views",
+                "Info.plist",
+                "LaunchScreen.storyboard",
+                "OpenAiPayApp.swift"
             ],
             sources: [
-                "AuthStore.swift",
-                "Models.swift"
+                "Core/AuthStore.swift",
+                "Core/Models.swift",
+                "Core/ShortVideoState.swift",
+                "Features/ShortVideo/Models/ShortVideoModels.swift",
+                "Features/ShortVideo/Models/ShortVideoCommentModels.swift"
             ]
         ),
         .testTarget(

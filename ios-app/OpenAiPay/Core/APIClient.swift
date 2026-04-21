@@ -227,6 +227,7 @@ private func localizedErrorFieldName(_ raw: String) -> String {
         "businessDomainCode": "业务域",
         "bizOrderNo": "业务单号",
         "businessSceneCode": "业务场景",
+        "commentId": "评论标识",
         "confirmedShare": "确认份额",
         "content": "内容",
         "conversationId": "会话标识",
@@ -242,6 +243,7 @@ private func localizedErrorFieldName(_ raw: String) -> String {
         "fixedFee": "固定手续费",
         "fundCode": "基金代码",
         "fundDebitAmount": "爱存扣款金额",
+        "imageMediaId": "图片媒体标识",
         "limit": "条数",
         "loginId": "登录账号",
         "maxFee": "最高手续费",
@@ -254,6 +256,7 @@ private func localizedErrorFieldName(_ raw: String) -> String {
         "originalTradeNo": "原交易单号",
         "payableAmount": "应付金额",
         "payeeUserId": "收款方用户标识",
+        "parentCommentId": "父评论标识",
         "payerUserId": "付款方用户标识",
         "paymentId": "支付单号",
         "paymentMethod": "支付方式",
@@ -271,6 +274,7 @@ private func localizedErrorFieldName(_ raw: String) -> String {
         "templateCode": "模板编码",
         "tradeNo": "交易单号",
         "userId": "用户标识",
+        "videoId": "视频标识",
         "walletDebitAmount": "余额扣款金额",
         "xid": "全局事务号"
     ]
@@ -286,7 +290,8 @@ private func localizedErrorFieldName(_ raw: String) -> String {
         "product": "产品",
         "coupon": "券",
         "coupon template": "券模板",
-        "feedback ticket": "反馈单"
+        "feedback ticket": "反馈单",
+        "video": "视频"
     ]
     return entityLabels[trimmed.lowercased()] ?? trimmed
 }
@@ -2860,6 +2865,328 @@ final class APIClient {
             throw APIClientError.businessError(message: envelope.error?.message ?? "查询最近联系人失败")
         }
         throw APIClientError.decodeFailed
+    }
+
+    func fetchShortVideoFeed(cursor: String?, limit: Int = 3) async throws -> ShortVideoFeedPageData {
+        let normalizedLimit = max(1, min(limit, 10))
+        var components = URLComponents()
+        var queryItems = [URLQueryItem(name: "limit", value: String(normalizedLimit))]
+        if let cursor {
+            let trimmedCursor = cursor.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedCursor.isEmpty {
+                queryItems.append(URLQueryItem(name: "cursor", value: trimmedCursor))
+            }
+        }
+        components.queryItems = queryItems
+        let query = components.percentEncodedQuery ?? ""
+        let path = query.isEmpty ? "/api/short-video/feed" : "/api/short-video/feed?\(query)"
+        let (data, httpResponse) = try await requestBff(
+            bffPath: path,
+            method: "GET",
+            body: nil,
+            bffTimeoutOverride: 8
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoFeedPageData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载短视频失败")
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoFeedPageData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再查看视频")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载短视频失败")
+        }
+        if httpResponse.statusCode == 401 {
+            throw APIClientError.businessError(message: "请先登录后再查看视频")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func updateShortVideoLike(videoId: String, isLiked: Bool) async throws -> ShortVideoEngagementData {
+        let encodedVideoId = try shortVideoEncodedVideoId(videoId)
+        let failureMessage = isLiked ? "点赞失败" : "取消点赞失败"
+        return try await requestShortVideoEngagement(
+            path: "/api/short-video/videos/\(encodedVideoId)/like",
+            method: isLiked ? "POST" : "DELETE",
+            failureMessage: failureMessage
+        )
+    }
+
+    func updateShortVideoFavorite(videoId: String, isFavorited: Bool) async throws -> ShortVideoEngagementData {
+        let encodedVideoId = try shortVideoEncodedVideoId(videoId)
+        let failureMessage = isFavorited ? "收藏失败" : "取消收藏失败"
+        return try await requestShortVideoEngagement(
+            path: "/api/short-video/videos/\(encodedVideoId)/favorite",
+            method: isFavorited ? "POST" : "DELETE",
+            failureMessage: failureMessage
+        )
+    }
+
+    private func requestShortVideoEngagement(path: String,
+                                             method: String,
+                                             failureMessage: String) async throws -> ShortVideoEngagementData {
+        let (data, httpResponse) = try await requestBff(
+            bffPath: path,
+            method: method,
+            body: nil,
+            bffTimeoutOverride: 6
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoEngagementData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? failureMessage)
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoEngagementData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再进行互动")
+            }
+            if httpResponse.statusCode == 404 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "视频不存在或已下线")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? failureMessage)
+        }
+        if httpResponse.statusCode == 401 {
+            throw APIClientError.businessError(message: "请先登录后再进行互动")
+        }
+        if httpResponse.statusCode == 404 {
+            throw APIClientError.businessError(message: "视频不存在或已下线")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func fetchShortVideoComments(videoId: String,
+                                 cursor: String?,
+                                 limit: Int = 20) async throws -> ShortVideoCommentPageData {
+        let encodedVideoId = try shortVideoEncodedVideoId(videoId)
+        let normalizedLimit = max(1, min(limit, 50))
+        var components = URLComponents()
+        var queryItems = [URLQueryItem(name: "limit", value: String(normalizedLimit))]
+        if let cursor {
+            let trimmedCursor = cursor.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedCursor.isEmpty {
+                queryItems.append(URLQueryItem(name: "cursor", value: trimmedCursor))
+            }
+        }
+        components.queryItems = queryItems
+        let query = components.percentEncodedQuery ?? ""
+        let path = query.isEmpty
+            ? "/api/short-video/videos/\(encodedVideoId)/comments"
+            : "/api/short-video/videos/\(encodedVideoId)/comments?\(query)"
+        let (data, httpResponse) = try await requestBff(
+            bffPath: path,
+            method: "GET",
+            body: nil,
+            bffTimeoutOverride: 6
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoCommentPageData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载评论失败")
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoCommentPageData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再查看评论")
+            }
+            if httpResponse.statusCode == 404 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "视频不存在或已下线")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载评论失败")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func fetchShortVideoCommentReplies(commentId: String,
+                                       cursor: String?,
+                                       limit: Int = 20) async throws -> ShortVideoCommentPageData {
+        let encodedCommentId = try shortVideoEncodedCommentId(commentId)
+        let normalizedLimit = max(1, min(limit, 50))
+        var components = URLComponents()
+        var queryItems = [URLQueryItem(name: "limit", value: String(normalizedLimit))]
+        if let cursor {
+            let trimmedCursor = cursor.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedCursor.isEmpty {
+                queryItems.append(URLQueryItem(name: "cursor", value: trimmedCursor))
+            }
+        }
+        components.queryItems = queryItems
+        let query = components.percentEncodedQuery ?? ""
+        let path = query.isEmpty
+            ? "/api/short-video/comments/\(encodedCommentId)/replies"
+            : "/api/short-video/comments/\(encodedCommentId)/replies?\(query)"
+        let (data, httpResponse) = try await requestBff(
+            bffPath: path,
+            method: "GET",
+            body: nil,
+            bffTimeoutOverride: 6
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoCommentPageData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载回复失败")
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoCommentPageData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再查看回复")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "加载回复失败")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func createShortVideoComment(videoId: String,
+                                 content: String?,
+                                 parentCommentId: String?,
+                                 imageMediaId: String?) async throws -> ShortVideoCommentData {
+        let encodedVideoId = try shortVideoEncodedVideoId(videoId)
+        let normalizedContent = try normalizedShortVideoCommentContent(content)
+        let normalizedParentCommentId = normalizedShortVideoCommentOptionalId(parentCommentId)
+        let normalizedImageMediaId = normalizedShortVideoCommentOptionalId(imageMediaId)
+        guard normalizedContent != nil || normalizedImageMediaId != nil else {
+            throw APIClientError.businessError(message: "评论内容不能为空")
+        }
+        var requestObject: [String: Any] = [:]
+        if let normalizedContent {
+            requestObject["content"] = normalizedContent
+        }
+        if let normalizedParentCommentId {
+            requestObject["parentCommentId"] = normalizedParentCommentId
+        }
+        if let normalizedImageMediaId {
+            requestObject["imageMediaId"] = normalizedImageMediaId
+        }
+        let body = try JSONSerialization.data(withJSONObject: requestObject, options: [])
+        let (data, httpResponse) = try await requestBff(
+            bffPath: "/api/short-video/videos/\(encodedVideoId)/comments",
+            method: "POST",
+            body: body,
+            bffTimeoutOverride: 6
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoCommentData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "评论发布失败")
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoCommentData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再发表评论")
+            }
+            if httpResponse.statusCode == 404 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "视频不存在或已下线")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "评论发布失败")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func updateShortVideoCommentLike(commentId: String, isLiked: Bool) async throws -> ShortVideoCommentLikeData {
+        let encodedCommentId = try shortVideoEncodedCommentId(commentId)
+        let (data, httpResponse) = try await requestBff(
+            bffPath: "/api/short-video/comments/\(encodedCommentId)/like",
+            method: isLiked ? "POST" : "DELETE",
+            body: nil,
+            bffTimeoutOverride: 6
+        )
+
+        let decoder = JSONDecoder()
+        if httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 {
+            let envelope = try decoder.decode(BffEnvelope<ShortVideoCommentLikeData>.self, from: data)
+            if envelope.success, let payload = envelope.data {
+                return payload
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "评论点赞失败")
+        }
+
+        if let envelope = try? decoder.decode(BffEnvelope<ShortVideoCommentLikeData>.self, from: data) {
+            if httpResponse.statusCode == 401 {
+                throw APIClientError.businessError(message: envelope.error?.message ?? "请先登录后再点赞评论")
+            }
+            throw APIClientError.businessError(message: envelope.error?.message ?? "评论点赞失败")
+        }
+        throw APIClientError.decodeFailed
+    }
+
+    func uploadShortVideoCommentImage(imageData: Data,
+                                      fileName: String = "short-video-comment.jpg",
+                                      mimeType: String = "image/jpeg") async throws -> MediaAssetData {
+        let ownerUserId = try currentAuthenticatedUserId()
+        return try await uploadImage(
+            ownerUserId: ownerUserId,
+            imageData: imageData,
+            fileName: fileName,
+            mimeType: mimeType
+        )
+    }
+
+    private func shortVideoEncodedVideoId(_ rawVideoId: String) throws -> String {
+        let trimmedVideoId = rawVideoId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedVideoId.isEmpty else {
+            throw APIClientError.businessError(message: "videoId must not be blank")
+        }
+        if let encoded = trimmedVideoId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) {
+            return encoded
+        }
+        throw APIClientError.invalidURL
+    }
+
+    private func shortVideoEncodedCommentId(_ rawCommentId: String) throws -> String {
+        let trimmedCommentId = rawCommentId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedCommentId.isEmpty else {
+            throw APIClientError.businessError(message: "commentId must not be blank")
+        }
+        if let encoded = trimmedCommentId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) {
+            return encoded
+        }
+        throw APIClientError.invalidURL
+    }
+
+    private func normalizedShortVideoCommentContent(_ rawContent: String?) throws -> String? {
+        let trimmed = rawContent?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+        guard trimmed.count <= 500 else {
+            throw APIClientError.businessError(message: "content length must be <= 500")
+        }
+        return trimmed
+    }
+
+    private func normalizedShortVideoCommentOptionalId(_ rawValue: String?) -> String? {
+        let trimmed = rawValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func currentAuthenticatedUserId() throws -> Int64 {
+        guard let session = authStore.loadSession(expectedBffBaseURL: AppRuntime.bffBaseURL),
+              session.user.userId > 0 else {
+            throw APIClientError.businessError(message: "请先登录后再上传图片")
+        }
+        return session.user.userId
     }
 
     func fetchFriends(userId: Int64, limit: Int = 100) async throws -> [ContactFriendData] {

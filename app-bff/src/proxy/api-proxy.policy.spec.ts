@@ -22,7 +22,9 @@ describe('api proxy policy', () => {
     }
   });
 
-  it('blocks all mobile-facing business APIs by default', () => {
+  it('only allows short-video APIs by default', () => {
+    expect(isAllowedProxyPath('/api/short-video/feed')).toBe(true);
+    expect(isAllowedProxyPath('/api/short-video/videos/SVP202603310001/like')).toBe(true);
     expect(isAllowedProxyPath('/api/trade/pay')).toBe(false);
     expect(isAllowedProxyPath('/api/media/avatar.jpg')).toBe(false);
   });
@@ -45,6 +47,7 @@ describe('api proxy policy', () => {
 
     expect(isAllowedProxyPath('/api/trade/pay')).toBe(true);
     expect(isAllowedProxyPath('/api/media/avatar.jpg')).toBe(true);
+    expect(isAllowedProxyPath('/api/short-video/feed')).toBe(true);
     expect(isAllowedProxyPath('/api/users/880100068483692100/profile')).toBe(false);
   });
 });

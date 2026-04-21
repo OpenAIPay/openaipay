@@ -27,9 +27,11 @@
 
 `/api/*` is a controlled whitelist proxy, not a full passthrough.
 
-By default, no `/api/*` routes are exposed.
+By default, only `/api/short-video/**` is exposed for short-video feed integration and rollout.
 
-If you need to enable a route temporarily, declare it explicitly through `API_PROXY_ALLOWED_PREFIXES`, for example `/api/trade,/api/media`.
+If you need additional routes, append them through `API_PROXY_ALLOWED_PREFIXES`, for example `/api/trade,/api/media`.
+
+`/api/short-video/**` is always kept in the allowlist even when `API_PROXY_ALLOWED_PREFIXES` is configured.
 
 Mobile clients should use explicit endpoints such as `/bff/auth/*`, `/bff/apps/*`, `/bff/assets/*`, `/bff/cashier/*`, `/bff/users/*`, `/bff/contacts/*`, and `/bff/messages/*`.
 
@@ -51,7 +53,7 @@ If a request hits a non-allowed path, BFF returns `API_PROXY_ROUTE_NOT_ALLOWED` 
 - `API_PROXY_TIMEOUT_MS`
   - timeout for `/api/*` proxy requests, default `60000`
 - `API_PROXY_ALLOWED_PREFIXES`
-  - comma-separated allowlist prefixes for proxying; by default no `/api/*` route is enabled
+  - comma-separated allowlist prefixes for appending extra proxy paths; `/api/short-video` is always preserved
 - `API_PROXY_BLOCKED_PREFIXES`
   - comma-separated blocklist prefixes that can override defaults
 

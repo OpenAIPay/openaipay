@@ -85,6 +85,10 @@ aipay:
     max-image-bytes: 10485760
     compress-max-width: 1280
     jpeg-quality: 0.82
+  short-video:
+    cdn-base-url: ${OPENAIPAY_VIDEO_CDN_BASE_URL:}
+    default-playback-protocol: ${OPENAIPAY_VIDEO_DEFAULT_PROTOCOL:MP4}
+    default-playback-mime-type: ${OPENAIPAY_VIDEO_DEFAULT_MIME_TYPE:video/mp4}
   fund:
     primary-code: AICASH
     aicash:

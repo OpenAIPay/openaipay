@@ -77,6 +77,7 @@ final class ErrorMessageLocalizer {
             Map.entry("businessSceneCode", "业务场景"),
             Map.entry("confirmedShare", "确认份额"),
             Map.entry("content", "内容"),
+            Map.entry("commentId", "评论标识"),
             Map.entry("conversationId", "会话标识"),
             Map.entry("couponNo", "券编号"),
             Map.entry("creditDebitAmount", "信用扣款金额"),
@@ -115,6 +116,7 @@ final class ErrorMessageLocalizer {
             Map.entry("nav", "净值"),
             Map.entry("nickname", "昵称"),
             Map.entry("operationType", "操作类型"),
+            Map.entry("imageMediaId", "图片媒体标识"),
             Map.entry("originalAmount", "原始金额"),
             Map.entry("originalTradeOrderNo", "原交易单号"),
             Map.entry("originalVoucher", "原凭证"),
@@ -132,6 +134,7 @@ final class ErrorMessageLocalizer {
             Map.entry("pendingRedeemShare", "待确认转出份额"),
             Map.entry("pendingSubscribeAmount", "待确认转入金额"),
             Map.entry("peerUserId", "对方用户标识"),
+            Map.entry("parentCommentId", "父评论标识"),
             Map.entry("permission", "权限"),
             Map.entry("permissionCode", "权限编码"),
             Map.entry("principalBalance", "本金余额"),
@@ -155,6 +158,7 @@ final class ErrorMessageLocalizer {
             Map.entry("totalLimit", "总额度"),
             Map.entry("tradeOrderNo", "交易单号"),
             Map.entry("userId", "用户标识"),
+            Map.entry("videoId", "视频标识"),
             Map.entry("validFrom", "生效时间"),
             Map.entry("validTo", "失效时间"),
             Map.entry("walletDebitAmount", "余额扣款金额"),
@@ -176,6 +180,7 @@ final class ErrorMessageLocalizer {
             Map.entry("red packet", "红包"),
             Map.entry("subscribe transaction", "转入交易"),
             Map.entry("trade", "交易"),
+            Map.entry("video", "视频"),
             Map.entry("wallet account", "余额账户")
     );
 

@@ -39,6 +39,7 @@ public class UserWebMvcConfig implements WebMvcConfigurer {
                         "/api/agreements/**",
                         "/api/bankcards/**",
                         "/api/coupons/**",
+                        "/api/short-video/**",
                         "/api/credit-accounts/users/**",
                         "/api/loan-accounts/users/**",
                         "/api/fund-accounts/**",

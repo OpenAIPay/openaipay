@@ -18,6 +18,15 @@
 		16A718293A4B5C6D7E903A11 /* HomePaymentCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A718293A4B5C6D7E903A12 /* HomePaymentCodeView.swift */; };
 		17B8293A4B5C6D7E903A12B3 /* HomeFundOperationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B8293A4B5C6D7E903A12B4 /* HomeFundOperationViews.swift */; };
 		1E894F6A78DBCEB933FDE299 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1885C8510509E6E972112480 /* Assets.xcassets */; };
+		2A7E5D9101A24BC18C53E001 /* ShortVideoState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E002 /* ShortVideoState.swift */; };
+		2A7E5D9101A24BC18C53E003 /* ShortVideoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E004 /* ShortVideoModels.swift */; };
+		2A7E5D9101A24BC18C53E005 /* ShortVideoFeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E006 /* ShortVideoFeedViewModel.swift */; };
+		2A7E5D9101A24BC18C53E007 /* ShortVideoFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E008 /* ShortVideoFeedView.swift */; };
+		2A7E5D9101A24BC18C53E009 /* ShortVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E00A /* ShortVideoPlayerView.swift */; };
+		2A7E5D9101A24BC18C53E010 /* ShortVideoActionToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E011 /* ShortVideoActionToolbar.swift */; };
+		2A7E5D9101A24BC18C53E012 /* ShortVideoCommentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E013 /* ShortVideoCommentModels.swift */; };
+		2A7E5D9101A24BC18C53E014 /* ShortVideoCommentSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E015 /* ShortVideoCommentSheetViewModel.swift */; };
+		2A7E5D9101A24BC18C53E016 /* ShortVideoCommentSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7E5D9101A24BC18C53E017 /* ShortVideoCommentSheetView.swift */; };
 		4B6E453D9408DF2D003075C9 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E66B35C9C7271F25973C91 /* LoginView.swift */; };
 		66EA6D75FB68E9EC7AFB7347 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2A1C2EDF6D3E57C8D9CD95D /* ContentView.swift */; };
 		74BA611FBDE523492F8C7B64 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA9AED24D3043C411A4A6A2F /* APIClient.swift */; };
@@ -43,6 +52,15 @@
 		17B8293A4B5C6D7E903A12B4 /* HomeFundOperationViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFundOperationViews.swift; sourceTree = "<group>"; };
 		1885C8510509E6E972112480 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1F05686E8C78462DEE628972 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E002 /* ShortVideoState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoState.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E004 /* ShortVideoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoModels.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E006 /* ShortVideoFeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoFeedViewModel.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E008 /* ShortVideoFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoFeedView.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E00A /* ShortVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoPlayerView.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E011 /* ShortVideoActionToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoActionToolbar.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E013 /* ShortVideoCommentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoCommentModels.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E015 /* ShortVideoCommentSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoCommentSheetViewModel.swift; sourceTree = "<group>"; };
+		2A7E5D9101A24BC18C53E017 /* ShortVideoCommentSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortVideoCommentSheetView.swift; sourceTree = "<group>"; };
 		278A12ED889BAA8D38D07FB1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2CDDC9A659219FD493D67D5E /* AipayLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AipayLogoView.swift; sourceTree = "<group>"; };
 		541949D84DBE096C4ED7C31C /* OpenAiPayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAiPayApp.swift; sourceTree = "<group>"; };
@@ -63,6 +81,7 @@
 			children = (
 				3644F1FC901DEDA9A8BEA188 /* Auth */,
 				195BA193FE8F83DD5B345914 /* Home */,
+				2A7E5D9101A24BC18C53E00B /* ShortVideo */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -98,9 +117,57 @@
 				A072E7EF45E66E6E37FBE15E /* AppState.swift */,
 				01A1519A14F16C928661CED3 /* AuthStore.swift */,
 				7A70947C6CFD5FC4E31F549F /* Models.swift */,
+				2A7E5D9101A24BC18C53E002 /* ShortVideoState.swift */,
 				D3B8F9A42E3B5C6D7E8F9012 /* ScreenshotStatusMaskView.swift */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		2A7E5D9101A24BC18C53E00B /* ShortVideo */ = {
+			isa = PBXGroup;
+			children = (
+				2A7E5D9101A24BC18C53E00C /* Components */,
+				2A7E5D9101A24BC18C53E00D /* Models */,
+				2A7E5D9101A24BC18C53E00E /* ViewModels */,
+				2A7E5D9101A24BC18C53E00F /* Views */,
+			);
+			path = ShortVideo;
+			sourceTree = "<group>";
+		};
+		2A7E5D9101A24BC18C53E00C /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2A7E5D9101A24BC18C53E011 /* ShortVideoActionToolbar.swift */,
+				2A7E5D9101A24BC18C53E00A /* ShortVideoPlayerView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		2A7E5D9101A24BC18C53E00D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2A7E5D9101A24BC18C53E013 /* ShortVideoCommentModels.swift */,
+				2A7E5D9101A24BC18C53E004 /* ShortVideoModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2A7E5D9101A24BC18C53E00E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				2A7E5D9101A24BC18C53E015 /* ShortVideoCommentSheetViewModel.swift */,
+				2A7E5D9101A24BC18C53E006 /* ShortVideoFeedViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		2A7E5D9101A24BC18C53E00F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2A7E5D9101A24BC18C53E017 /* ShortVideoCommentSheetView.swift */,
+				2A7E5D9101A24BC18C53E008 /* ShortVideoFeedView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		2B70295BD19A0B733C2B76F7 = {
@@ -234,6 +301,15 @@
 				9586834CB25D57D19B252F81 /* Models.swift in Sources */,
 				13BD0320AFA7026BDFADBF00 /* OpenAiPayApp.swift in Sources */,
 				C2A7E8F31D2A4B7C8D9E0F11 /* ScreenshotStatusMaskView.swift in Sources */,
+				2A7E5D9101A24BC18C53E003 /* ShortVideoModels.swift in Sources */,
+				2A7E5D9101A24BC18C53E012 /* ShortVideoCommentModels.swift in Sources */,
+				2A7E5D9101A24BC18C53E010 /* ShortVideoActionToolbar.swift in Sources */,
+				2A7E5D9101A24BC18C53E014 /* ShortVideoCommentSheetViewModel.swift in Sources */,
+				2A7E5D9101A24BC18C53E016 /* ShortVideoCommentSheetView.swift in Sources */,
+				2A7E5D9101A24BC18C53E005 /* ShortVideoFeedViewModel.swift in Sources */,
+				2A7E5D9101A24BC18C53E007 /* ShortVideoFeedView.swift in Sources */,
+				2A7E5D9101A24BC18C53E009 /* ShortVideoPlayerView.swift in Sources */,
+				2A7E5D9101A24BC18C53E001 /* ShortVideoState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

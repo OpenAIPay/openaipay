@@ -1,0 +1,407 @@
+openapi: 3.0.3
+info:
+  title: OpenAIPay 短视频 API
+  version: 0.1.0
+  description: |
+    短视频信息流第一阶段接口契约。该契约遵循仓库现有 `ApiResponse` 包裹格式：
+    `success + data + error`。
+servers:
+  - url: http://127.0.0.1:8080
+    description: 本地开发环境
+tags:
+  - name: ShortVideoFeed
+    description: 短视频信息流与互动接口
+security:
+  - bearerAuth: []
+paths:
+  /api/short-video/feed:
+    get:
+      tags: [ShortVideoFeed]
+      summary: 拉取短视频信息流
+      description: |
+        返回按信息流排序输出的视频列表。第一阶段客户端通常一次请求 1~3 条，
+        并在本地做预取缓存。返回条目内已包含当前用户互动快照：
+        `liked`、`favorited`、`likeCount`、`favoriteCount`、`commentCount`。
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 上一页返回的游标；为空时表示拉取首屏
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 3
+          description: 本次返回条数
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseFeedPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/short-video/videos/{videoId}/like:
+    post:
+      tags: [ShortVideoFeed]
+      summary: 点赞视频
+      description: 返回当前用户对该视频的最新互动状态快照。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      responses:
+        "200":
+          description: 点赞后返回最新互动状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEngagementState"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [ShortVideoFeed]
+      summary: 取消点赞
+      description: 返回当前用户对该视频的最新互动状态快照。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      responses:
+        "200":
+          description: 取消点赞后返回最新互动状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEngagementState"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/short-video/videos/{videoId}/favorite:
+    post:
+      tags: [ShortVideoFeed]
+      summary: 收藏视频
+      description: 返回当前用户对该视频的最新互动状态快照。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      responses:
+        "200":
+          description: 收藏后返回最新互动状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEngagementState"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [ShortVideoFeed]
+      summary: 取消收藏
+      description: 返回当前用户对该视频的最新互动状态快照。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      responses:
+        "200":
+          description: 取消收藏后返回最新互动状态
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseEngagementState"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/short-video/videos/{videoId}/comments:
+    get:
+      tags: [ShortVideoFeed]
+      summary: 查询视频评论
+      description: |
+        返回评论分页结果。第一阶段只返回 `ACTIVE` 状态评论，按时间倒序输出。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 评论翻页游标
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCommentPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [ShortVideoFeed]
+      summary: 发布评论
+      description: |
+        发布成功后直接返回新创建的评论对象；内容会在服务端执行去首尾空白和长度校验。
+      parameters:
+        - $ref: "#/components/parameters/VideoId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "200":
+          description: 评论发布成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCommentItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: 使用现有认证链路签发的 Bearer accessToken（非 JWT）
+  parameters:
+    VideoId:
+      name: videoId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: 视频业务标识
+  responses:
+    Unauthorized:
+      description: 未登录或令牌无效，错误码为 `UNAUTHORIZED`
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+    NotFound:
+      description: 视频不存在或不可访问，错误码为 `RESOURCE_NOT_FOUND`
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+    BadRequest:
+      description: 参数错误，错误码通常为 `VALIDATION_ERROR`
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseError"
+  schemas:
+    ApiResponseFeedPage:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/FeedPage"
+        error:
+          nullable: true
+          $ref: "#/components/schemas/ErrorBody"
+      required: [success, data]
+    ApiResponseEngagementState:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/EngagementState"
+        error:
+          nullable: true
+          $ref: "#/components/schemas/ErrorBody"
+      required: [success, data]
+    ApiResponseCommentPage:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/CommentPage"
+        error:
+          nullable: true
+          $ref: "#/components/schemas/ErrorBody"
+      required: [success, data]
+    ApiResponseCommentItem:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/CommentItem"
+        error:
+          nullable: true
+          $ref: "#/components/schemas/ErrorBody"
+      required: [success, data]
+    ApiResponseError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          nullable: true
+        error:
+          $ref: "#/components/schemas/ErrorBody"
+      required: [success, error]
+    ErrorBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: UNAUTHORIZED
+        message:
+          type: string
+          example: 用户鉴权失败：缺少有效 Bearer Token
+      required: [code, message]
+    FeedPage:
+      type: object
+      description: 短视频信息流分页响应
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/VideoFeedItem"
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required: [items, hasMore]
+    VideoFeedItem:
+      type: object
+      description: 短视频信息流中的单条视频
+      properties:
+        videoId:
+          type: string
+        caption:
+          type: string
+        author:
+          $ref: "#/components/schemas/AuthorSummary"
+        coverUrl:
+          type: string
+          format: uri
+        playback:
+          $ref: "#/components/schemas/PlaybackInfo"
+        engagement:
+          $ref: "#/components/schemas/EngagementState"
+      required: [videoId, author, coverUrl, playback, engagement]
+    AuthorSummary:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        nickname:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+      required: [userId, nickname]
+    PlaybackInfo:
+      type: object
+      description: 播放资源信息。本地联调通常返回 MP4，生产形态优先 HLS。
+      properties:
+        playbackUrl:
+          type: string
+          format: uri
+        protocol:
+          type: string
+          example: HLS
+        mimeType:
+          type: string
+          example: application/vnd.apple.mpegurl
+        durationMs:
+          type: integer
+          format: int64
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+      required: [playbackUrl, protocol, mimeType, durationMs]
+    EngagementState:
+      type: object
+      description: 当前用户对视频的互动状态和聚合计数
+      properties:
+        liked:
+          type: boolean
+        favorited:
+          type: boolean
+        likeCount:
+          type: integer
+          format: int64
+        favoriteCount:
+          type: integer
+          format: int64
+        commentCount:
+          type: integer
+          format: int64
+      required: [liked, favorited, likeCount, favoriteCount, commentCount]
+    CommentPage:
+      type: object
+      description: 评论分页响应
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentItem"
+        nextCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+      required: [items, hasMore]
+    CommentItem:
+      type: object
+      description: 单条评论响应
+      properties:
+        commentId:
+          type: string
+        videoId:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthorSummary"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [commentId, videoId, user, content, createdAt]
+    CreateCommentRequest:
+      type: object
+      description: 发布评论请求
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: 评论内容，服务端会在去除首尾空白后校验非空
+      required: [content]

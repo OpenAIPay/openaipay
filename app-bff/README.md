@@ -27,9 +27,11 @@
 
 `/api/*` 不是全量透传，而是受控白名单代理。
 
-默认不开放任何 `/api/*` 代理路径。
+默认仅开放 `/api/short-video/**` 代理路径，用于短视频信息流联调与上线。
 
-如需临时开启，只能通过 `API_PROXY_ALLOWED_PREFIXES` 显式指定前缀，例如 `/api/trade,/api/media`。
+如需额外开启，可通过 `API_PROXY_ALLOWED_PREFIXES` 显式追加前缀，例如 `/api/trade,/api/media`。
+
+无论是否配置 `API_PROXY_ALLOWED_PREFIXES`，`/api/short-video/**` 都会保持放行。
 
 移动端应统一走显式的 `/bff/auth/*`、`/bff/apps/*`、`/bff/assets/*`、`/bff/cashier/*`、`/bff/users/*`、`/bff/contacts/*`、`/bff/messages/*` 接口。
 
@@ -51,7 +53,7 @@
 - `API_PROXY_TIMEOUT_MS`
   - `/api/*` 代理超时，默认 `60000`
 - `API_PROXY_ALLOWED_PREFIXES`
-  - 逗号分隔的代理白名单前缀；默认不放行任何 `/api/*` 代理，按需显式配置
+  - 逗号分隔的代理白名单前缀；用于追加放行路径，`/api/short-video` 会始终保留
 - `API_PROXY_BLOCKED_PREFIXES`
   - 逗号分隔的代理黑名单前缀，可覆盖默认值
 

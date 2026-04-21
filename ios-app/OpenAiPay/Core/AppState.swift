@@ -485,18 +485,34 @@ final class AppState: ObservableObject {
         if !force, session != nil {
             return
         }
-        if shouldUseDebugLaunchSession {
-            let normalized: LoginResponseData
-            if let storedSession = authStore.loadSession() {
-                let storedNormalized = normalizeSession(storedSession)
-                if storedNormalized.user.userId == Self.debugLaunchUserId {
-                    normalized = storedNormalized
-                } else {
-                    normalized = normalizeSession(Self.makeDebugLaunchSession())
+
+        if AppRuntime.allowsLocalSyntheticAuth,
+           !shouldUseDebugLaunchSession,
+           let storedSession = authStore.loadSession() {
+            let storedNormalized = normalizeSession(storedSession)
+            if storedNormalized.user.userId == Self.debugLaunchUserId {
+                let preferredLoginId = normalizedMainlandMobileLoginId(storedNormalized.user.loginId)
+                session = nil
+                authStore.clearSession()
+                Task {
+                    await restoreDebugLaunchSessionFromServer(preferredLoginId: preferredLoginId)
                 }
-            } else {
-                normalized = normalizeSession(Self.makeDebugLaunchSession())
+                return
             }
+        }
+
+        if shouldUseDebugLaunchSession {
+            if AppRuntime.allowsLocalSyntheticAuth {
+                let preferredLoginId = normalizedMainlandMobileLoginId(authStore.loadSession()?.user.loginId)
+                session = nil
+                authStore.clearSession()
+                Task {
+                    await restoreDebugLaunchSessionFromServer(preferredLoginId: preferredLoginId)
+                }
+                return
+            }
+            // 调试启动页始终重建本地会话，避免沿用旧签名密钥生成的缓存 token 导致 401。
+            let normalized = normalizeSession(Self.makeDebugLaunchSession())
             session = normalized
             authStore.saveSession(normalized, bffBaseURL: AppRuntime.bffBaseURL)
             Task {
@@ -576,6 +592,35 @@ final class AppState: ObservableObject {
                 resultSummary: "PAGE_VIEW",
                 durationMs: nil,
                 payload: nil
+            )
+        }
+    }
+
+    func recordBehaviorEvent(
+        eventName: String,
+        eventType: String?,
+        eventCode: String?,
+        pageName: String?,
+        actionName: String?,
+        resultSummary: String?,
+        payload: [String: Any]? = nil,
+        minimumInterval: TimeInterval = 0
+    ) {
+        let normalizedEventName = eventName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedEventName.isEmpty else {
+            return
+        }
+        Task {
+            await emitBehaviorEvent(
+                eventName: normalizedEventName,
+                eventType: eventType,
+                eventCode: eventCode,
+                pageName: pageName,
+                actionName: actionName,
+                resultSummary: resultSummary,
+                durationMs: nil,
+                payload: payload,
+                minimumInterval: minimumInterval
             )
         }
     }
@@ -744,9 +789,10 @@ final class AppState: ObservableObject {
         actionName: String?,
         resultSummary: String?,
         durationMs: Int64?,
-        payload: [String: Any]?
+        payload: [String: Any]?,
+        minimumInterval: TimeInterval = 1
     ) async {
-        guard shouldTrackBehaviorEvent(named: eventName, minimumInterval: 1) else {
+        guard shouldTrackBehaviorEvent(named: eventName, minimumInterval: minimumInterval) else {
             return
         }
         do {
@@ -932,6 +978,26 @@ final class AppState: ObservableObject {
         }
         return normalizedMainlandMobileLoginId(session.user.loginId)
             ?? normalizedMainlandMobileLoginId(session.user.mobile)
+    }
+
+    private func restoreDebugLaunchSessionFromServer(preferredLoginId: String?) async {
+        do {
+            let remoteSession = try await APIClient.shared.demoAutoLogin(
+                deviceId: AppRuntime.deviceId,
+                preferredLoginId: preferredLoginId
+            )
+            let normalized = normalizeSession(remoteSession)
+            session = normalized
+            authStore.saveSession(normalized, bffBaseURL: AppRuntime.bffBaseURL)
+            await performPostLoginTasks()
+            await refreshCurrentUserProfileIfNeeded(userId: normalized.user.userId)
+        } catch {
+            // 本地调试兜底：若网络不可用，仍保留原有 synthetic 会话行为。
+            let fallback = normalizeSession(Self.makeDebugLaunchSession())
+            session = fallback
+            authStore.saveSession(fallback, bffBaseURL: AppRuntime.bffBaseURL)
+            await refreshCurrentUserProfileIfNeeded(userId: Self.debugLaunchUserId)
+        }
     }
 
     private func isUserNotFoundError(_ error: Error) -> Bool {
